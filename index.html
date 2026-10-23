@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Portal de recursos clínicos de Atención Primaria y Urgencias.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>MED-APP</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: app móvil con cabecera fija (marca + búsqueda), contenido en grupos plegables y barra de pestañas inferior. */
+:root{
+  --bg:#F1F5F4; --surface:#FFFFFF; --ink:#12292C; --muted:#566B6D; --line:#D6E0DE; --hover:#EAF2F0;
+  --accent:#0A7C74; --accent-ink:#FFFFFF; --alert:#B8321F; --alert-bg:#FCEBE8;
+  --f-display:'Bricolage Grotesque','Segoe UI',system-ui,sans-serif;
+  --f-body:'IBM Plex Sans','Segoe UI',system-ui,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1B1D; --surface:#142629; --ink:#E4EEEC; --muted:#93A8A6; --line:#25403F; --hover:#1B3236;
+    --accent:#3CC1B5; --accent-ink:#062321; --alert:#FF9C8B; --alert-bg:#3A1E1A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1B1D; --surface:#142629; --ink:#E4EEEC; --muted:#93A8A6; --line:#25403F; --hover:#1B3236;
+  --accent:#3CC1B5; --accent-ink:#062321; --alert:#FF9C8B; --alert-bg:#3A1E1A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 15px/1.45 var(--f-body);margin:0;-webkit-text-size-adjust:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:780px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;flex-direction:column;gap:10px;padding-block:12px}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand svg{flex:none;color:var(--accent)}
+.brand b{font:800 21px/1 var(--f-display);letter-spacing:.01em}
+.brand span{font:500 11px/1.2 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ia{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 18px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font:600 14px var(--f-body);text-decoration:none}
+.search{position:relative}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search input{width:100%;height:44px;padding:0 14px 0 40px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:400 16px var(--f-body)}
+.search input::placeholder{color:var(--muted)}
+
+main.wrap{padding-block:22px 110px}
+.h1{margin:0;font:800 clamp(27px,7vw,36px)/1.05 var(--f-display);text-wrap:balance}
+.lead{margin:8px 0 0;max-width:60ch;color:var(--muted)}
+.eyebrow{margin:24px 0 8px;font:500 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:600 14px var(--f-body);text-decoration:none}
+.chip.alert{background:var(--alert-bg);color:var(--alert);border-color:transparent}
+.hint{margin:0;color:var(--muted);font-size:14px}
+
+.grp{background:var(--surface);border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden}
+.grp.plain{margin-top:0}
+.grp summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:54px;padding:12px 8px 12px 16px;cursor:pointer}
+.grp summary::-webkit-details-marker{display:none}
+.grp h2{margin:0;flex:1;min-width:0;font:700 17px/1.2 var(--f-display)}
+.grp.alert h2{color:var(--alert)}
+.count{font:500 12px var(--f-mono);color:var(--muted)}
+.chev{flex:none;width:24px;height:24px;margin-right:8px;color:var(--muted);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.grp:not([open]) .chev{transform:rotate(-90deg)}
+.grp ul{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:minmax(0,1fr) 48px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.link{display:flex;flex-direction:column;gap:2px;min-width:0;padding:12px 4px 12px 16px;text-decoration:none}
+.link:hover{background:var(--hover)}
+.t{font-weight:500;overflow-wrap:anywhere}
+.d{font-size:13px;color:var(--muted)}
+.meta{font:500 11px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);overflow-wrap:anywhere}
+.star{display:flex;align-items:center;justify-content:center;width:48px;border:0;background:none;color:var(--muted);cursor:pointer}
+.star svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linejoin:round}
+.star[aria-pressed="true"]{color:var(--accent)}
+.star[aria-pressed="true"] svg{fill:currentColor}
+
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(4,minmax(0,1fr))}
+.tab{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:58px;padding:6px 2px;border:0;background:none;color:var(--muted);font:500 12px var(--f-body);cursor:pointer}
+.tab svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.tab[aria-current="page"]{color:var(--accent);font-weight:600}
+.tab[aria-current="page"]::before{content:"";position:absolute;top:0;left:22%;right:22%;height:3px;border-radius:0 0 3px 3px;background:var(--accent)}
+.foot{margin-top:28px;font-size:12.5px;color:var(--muted);max-width:62ch}
+@media (prefers-reduced-motion:reduce){.chev{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="bar">
+      <div class="brand">
+        <svg width="34" height="22" viewBox="0 0 40 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1,13 9,13 13,4 19,21 24,9 27,13 39,13"/></svg>
+        <div><b>MED-APP</b><br><span>Atención Primaria · Urgencias</span></div>
+      </div>
+      <a class="ia" href="https://notebooklm.google.com/notebook/d6e96eca-a789-412d-bc69-76dc971dfb3b" target="_blank" rel="noopener noreferrer" aria-label="Asistente de IA (NotebookLM)">IA</a>
+    </div>
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Buscar guía, escala o protocolo" autocomplete="off" aria-label="Buscar en todos los recursos">
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<nav class="tabs" aria-label="Secciones">
+  <div class="wrap">
+    <button class="tab" type="button" data-view="inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>Inicio</button>
+    <button class="tab" type="button" data-view="pediatria"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5c1 1.4 2.200 2 3.500 2s2.500-.6 3.500-2"/><path d="M9 10h.01M15 10h.01"/></svg>Pediatría</button>
+    <button class="tab" type="button" data-view="calculadoras"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>Calculadoras</button>
+    <button class="tab" type="button" data-view="formacion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 21V5"/></svg>Formación</button>
+  </div>
+</nav>
+
+<script>
+(function(){
+  var F='https://93100750-a694-46c5-8d46-2d04943b8e0e.filesusr.com/ugd/';
+  var G='https://algoritmos.aepap.org/algoritmo/';
+
+  var S=[
+  {id:'inicio',label:'Inicio',title:'Recursos clínicos',lead:'Guías, protocolos y material de urgencias para la consulta diaria.',groups:[
+    {n:'Procesos crónicos',items:[
+      ['Diabetes mellitus (DM)',F+'0dfcb2_a8754b03306c4f43b84a14177e5d7b87.pdf'],
+      ['Hipertensión arterial (HTA)',F+'0dfcb2_b132e7bea3304dcab12c945a7df56384.pdf'],
+      ['Dislipemia (DL)',F+'0dfcb2_78b42544b3164d9487bd4e60afa1a7a7.pdf'],
+      ['EPOC',F+'0dfcb2_dd0aa0dce4f645e0b2dafd3fad20a26d.pdf'],
+      ['Asma',F+'0dfcb2_0c47e3f9b80842818cb01a49846a673a.pdf']]},
+    {n:'Medicamentos',items:[
+      ['AEMPS','https://www.aemps.gob.es/','Agencia Española de Medicamentos y Productos Sanitarios'],
+      ['iDoctus','https://es.idoctus.com/consulta/medicamentos','Consulta de medicamentos'],
+      ['Guía terapéutica de SEMFYC','https://guiaterapeutica.net/','Guía terapéutica en Atención Primaria']]},
+    {n:'Guías',items:[
+      ['1-Aria','https://1aria.com/'],
+      ['Fisterra','https://www.fisterra.com/guias-clinicas/'],
+      ['AMF','https://amf-semfyc.com/es/web'],
+      ['Empendium','https://empendium.com/manualmibe/manual'],
+      ['GuiSalud','https://portal.guiasalud.es/'],
+      ['Protocolos','https://atencionppa3.wixsite.com/med-app/copia-de-calculadoras']]},
+    {n:'Antibioterapia',items:[
+      ['CURMP 2019',F+'3cf9cf_990866ce27c741679212324e4db65dcd.pdf'],
+      ['Antibioterapia empírica',F+'3cf9cf_41d72cc73cf8427a8512b606d13ffc00.pdf'],
+      ['PRAN Guías','https://resistenciaantibioticos.es/es/guias/humana/navegacion/-1']]},
+    {n:'Paliativos',items:[
+      ['Guía de cuidados paliativos','https://www.secpal.com/biblioteca_guia-cuidados-paliativos-1'],
+      ['Sedación paliativa','https://colegiodemedicos.es/wp-content/uploads/2021/07/Gu%C3%ADa-de-Sedaci%C3%B3n-Paliativa.pdf'],
+      ['Vía subcutánea','https://www.youtube.com/watch?v=WNHg6qzt3Z8']]},
+    {n:'Urgencias: patologías frecuentes',alert:true,items:[
+      ['Síndrome coronario agudo',F+'0dfcb2_bcbb9ba0f4264a93975617f7b72760e2.pdf'],
+      ['Código ICTUS',F+'0dfcb2_0808134eeb0147c2b37ff5a65b6cb043.pdf'],
+      ['Escala NIHSS',F+'3cf9cf_7fd0a7a2cadc4e769858987798f83557.pdf'],
+      ['Síncope',F+'0dfcb2_4162119c8a3e4a32b4bfa1ce9c848ade.pdf'],
+      ['Secuencia de inducción rápida',F+'3cf9cf_cd43d10496094059bdfc05395c697041.pdf'],
+      ['Taquicardia ventricular de QRS ancho','https://www.urgenciasyemergen.com/taquicardias-ventriculares-manejo-agudo-segun-guias-esc-2022/'],
+      ['Taquicardia de QRS ancho / estrecho','https://www.urgenciasyemergen.com/taquicardias-supraventriculares-nuevas-guias-2019/'],
+      ['Bradicardia',F+'3cf9cf_510c9473e91247678d18ffa359fabe37.pdf'],
+      ['Fibrilación auricular 2024',F+'3cf9cf_9e0a9ee3fbb74a9ca3945829095249d0.pdf']]},
+    {n:'Urgencias: recursos',items:[
+      ['Actualización RCP 2025','https://www.urgenciasyemergen.com/guias-rcp-erc-2025/?s=09','Resumen de las guías ERC 2025'],
+      ['Guías ERC 2025, versión íntegra (inglés)','https://www.erc.edu/science-research/guidelines/guidelines-2025/guidelines-2025-english'],
+      ['Guías AHA',F+'3cf9cf_bb3c0f2a39bb49bfa09eb4f6ca025d65.pdf'],
+      ['Guías ERC 2021',F+'3cf9cf_2fbe40682bd54f1ab01d5b8cdca39f01.pdf'],
+      ['SAMUR','https://www.madrid.es/ficheros/SAMUR/index.html'],
+      ['Manual de la Univ. de Salamanca','https://eusal.es/eusal/catalog/view/978-84-9012-989-0/4382/21-1'],
+      ['Murillo, 7.ª edición',F+'3cf9cf_2e5ebd135e6a4382ae7edf623a51c84a.pdf'],
+      ['Mi primera guardia en letras',F+'0dfcb2_6d4da5e19dbd431e8d1ddc33c53e04a3.pdf'],
+      ['RCCC.EU','https://rccc.eu/'],
+      ['Chuletario de Urgencias','https://www.chuletariodeurgencias.es/'],
+      ['Urgencias y Emergencias','https://www.urgenciasyemergen.com/'],
+      ['Ecografía (The POCUS Atlas)','https://www.thepocusatlas.com/'],
+      ['Escalas en Urgencias',F+'3cf9cf_05c96ff07e8146daa29f0f4f446d3c49.pdf']]},
+    {n:'Recursos para pacientes',items:[
+      ['SEMFYC',F+'3cf9cf_f3da702933df48279af14537ffe76788.pdf'],
+      ['Ejercicios','http://www.sermef-ejercicios.org/'],
+      ['Dietas','https://drive.google.com/drive/folders/1QeTUkCzHYpuWAsd_3GgBRgzVHIFaR_ik?usp=sharing']]},
+    {n:'Imagen radiológica',items:[
+      ['Radiology Masterclass','https://www.radiologymasterclass.co.uk/gallery/galleries']]}
+  ]},
+
+  {id:'pediatria',label:'Pediatría',title:'Pediatría',lead:'Algoritmos, dosis por peso, vacunas y fármacos en lactancia y embarazo.',groups:[
+    {n:'Algoritmos rápidos (AEPap)',alert:true,items:[
+      ['Crisis de asma',G+'35/crisis-de-asma'],
+      ['Bronquiolitis',G+'32/bronquiolitis'],
+      ['Laringitis',G+'77/laringitis'],
+      ['Cefalea',G+'5/cefalea'],
+      ['Anafilaxia',G+'41/anafilaxia'],
+      ['Crisis convulsiva',G+'81/crisis-convulsiva'],
+      ['Vómitos',G+'29/vomitos']]},
+    {n:'Referencias generales',items:[
+      ['Guía ABE','https://guia-abe.es/index.php','Recurso general de pediatría'],
+      ['Algoritmos AEPap','https://algoritmos.aepap.org/index.php?lang=es','Manejo de las patologías más prevalentes'],
+      ['Protocolos de Urgencias pediátricas','https://seup.org/protocolos/'],
+      ['PEDIAMECUM','https://www.aeped.es/comite-medicamentos/pediamecum','Base de datos de principios activos usados en pediatría'],
+      ['Dosis por peso (vademécum pediátrico)',F+'3cf9cf_e0046372c0ff4f338c2877cc4d2f957c.xlsx?dn=vadem%C3%A9cum_pedi%C3%A1trico.xlsx']]},
+    {n:'Vacunas',items:[
+      ['Calendario vacunal general','https://www.sanidad.gob.es/profesionales/saludPublica/prevPromocion/vacunaciones/calendario-y-coberturas/docs/CalendarioVacunacion_Todalavida.pdf'],
+      ['Calendario según CCAA','https://vacunasaep.org/profesionales/calendario-vacunas']]},
+    {n:'Lactancia y embarazo',items:[
+      ['e-lactancia','https://e-lactancia.org/','Compatibilidad de los medicamentos con la lactancia'],
+      ['Medicamentos y embarazo',F+'3cf9cf_5bdcfc8d159b443b94576d3b37540110.pdf'],
+      ['Fármacos contraindicados',F+'3cf9cf_66e0fc664e3a4cf3a8b9d1bdf39ef9e4.pdf']]},
+    {n:'Para las familias',items:[
+      ['Recomendaciones para padres','https://seup.org/hojas-informativas/','Hojas informativas de la SEUP']]},
+    {n:'Imagen',items:[
+      ['Normal Bones','http://bones.getthediagnosis.org/','Atlas de huesos normales']]}
+  ]},
+
+  {id:'calculadoras',label:'Calculadoras',title:'Calculadoras',lead:'Escalas y calculadoras de riesgo en sitios de referencia.',groups:[
+    {n:'Riesgo cardiovascular',items:[
+      ['REGICOR','https://regicor.cat/es/aplicaciones/regicor/'],
+      ['RCV Andalucía','http://si.easp.es/csalud/RiesgoScore.aspx'],
+      ['QRisk','https://qrisk.org/three/index.php','Recomendada en menores de 40 años']]},
+    {n:'Riesgo de ictus y sangrado',items:[
+      ['CHA2DS2-VASc','https://www.samiuc.es/chads2-vasc-score/','Riesgo de ictus en los próximos 12 meses'],
+      ['HAS-BLED','https://www.mdcalc.com/has-bled-score-major-bleeding-risk','Riesgo de sangrado mayor']]},
+    {n:'Riesgo de fracturas óseas',items:[
+      ['FRAX','https://www.sheffield.ac.uk/FRAX/tool.aspx?lang=sp']]},
+    {n:'Dermatología',items:[
+      ['PASI','https://dermovirtual.com/calculadora-pasi/','Extensión de la psoriasis'],
+      ['EASI','https://campus.sanofi.es/es/herramientas/calculadora-easi-scorad','Gravedad de la dermatitis atópica']]},
+    {n:'Neumología',items:[
+      ['Escala de somnolencia de Epworth','https://www.msdmanuals.com/es-es/professional/multimedia/clinical-calculator/escala-de-somnolencia-de-epworth-ese'],
+      ['Fallo de VMNI al ingreso en EPOC descompensada','https://www.samiuc.es/riesgo-de-fracaso-de-la-vni-en-las-agudizaciones-de-la-epoc/'],
+      ['Monitorización de VMNI',F+'3cf9cf_a2e3c53c26d64190a7a907cbe9d99c1c.pdf'],
+      ['FiO2 por puntas nasales (para PaO2/FiO2)','https://icemachine-cn.es/wp-content/uploads/2022/02/fio2-por-puntas-nasales.png']]},
+    {n:'Síndrome prostático',items:[
+      ['Cuestionario IPSS','https://www.fisterra.com/ayuda-en-consulta/calculos/baremo-internacional-sintomatologia-prostatica-ipss/']]},
+    {n:'Opioides',items:[
+      ['Rotación de opioides','https://www.symbaloo.com/out.do?smarkId=721109700&desktopId=1000006045325660'],
+      ['Dosis equipotentes',F+'3cf9cf_f388ebdac56f4b5d8045980c65918f33.pdf'],
+      ['Dolor y cáncer',F+'3cf9cf_3b89660ab5a0432c88fa157f7cc8bc99.pdf']]},
+    {n:'Digestivo',items:[
+      ['BISAP','https://www.rccc.eu/scores/BISAP.html','Pancreatitis aguda']]}
+  ]},
+
+  {id:'formacion',label:'Formación',title:'Formación',lead:'Apuntes propios y propuestas formativas libres de humos.',groups:[
+    {n:'Material propio',items:[
+      ['Apuntes','https://drive.google.com/drive/folders/1-b4BeDvU_APi9yiv2O3Okkfla7WycjaK?usp=sharing'],
+      ['Sesiones','https://drive.google.com/drive/folders/1oMI_KCch3dtRGM7q3Ng5oa0xCdY5eUDF'],
+      ['Manuales','https://drive.google.com/drive/folders/1CHJDxTFbMfaKVoWVZv6xJWucGqAlUdRH?usp=sharing']]},
+    {n:'Propuestas formativas «libres de humos»',items:[
+      ['El rincón de Sísifo','https://elrincondesisifo.org/','Carlos Fernández Oropesa'],
+      ['La Cabecera','https://lacabecera.org/'],
+      ['Seminarios de Innovación de Atención Primaria (SIAP)','http://equipocesca.org/que-son-los-seminarios-de-innovacion-en-atencion-primaria-siap/'],
+      ['Plataforma NoGracias','https://www.nogracias.eu'],
+      ['OPIK, Grupo de Investigación (UPV/EHU)','https://www.ehu.eus/es/web/opik/home'],
+      ['SEMFYC','https://www.semfyc.es/medicos/','Congresos libres de humos y algunos cursos no patrocinados'],
+      ['Escuela de Salud Pública de Menorca','http://www.emsp.cime.es/'],
+      ['Biblioteca Astursalud','https://www.astursalud.es/noticias/-/noticias/recursos-bvgcsalud'],
+      ['Perlas RRSS','https://docs.google.com/document/d/1-AI_Ex5PRni_hJ8sL1MdTdN7G8NaBepVRrz5VehreOM/edit?usp=sharing'],
+      ['Sanofi','https://www.sanofi.es/es/'],
+      ['Urgencias Bidasoa','https://urgenciasbidasoa.wordpress.com/'],
+      ['La mochila del resi','https://lamochiladelresi.wordpress.com/'],
+      ['Cardioteca','https://www.cardioteca.com/aula-ecg-electrocardiograma.html','Aula de ECG'],
+      ['Radiology Masterclass','https://www.radiologymasterclass.co.uk/gallery/galleries'],
+      ['Más webs de imagen radiológica','https://www.aulacem.es/las-16-webs-mas-influyentes-sobre-imagen-radiologica/#RadiologyInfo_para_profesionales_y_pacientes'],
+      ['Normal Bones (1)','http://bones.getthediagnosis.org/'],
+      ['Normal Bones (2)','https://normalbones.com/app'],
+      ['FAPap','https://fapap.es/']]}
+  ]}
+  ];
+
+  var QUICK=[
+    ['Actualización RCP 2025','https://www.urgenciasyemergen.com/guias-rcp-erc-2025/?s=09',1],
+    ['Código ICTUS',F+'0dfcb2_0808134eeb0147c2b37ff5a65b6cb043.pdf',1],
+    ['Síndrome coronario agudo',F+'0dfcb2_bcbb9ba0f4264a93975617f7b72760e2.pdf',1],
+    ['Anafilaxia pediátrica',G+'41/anafilaxia',1],
+    ['iDoctus','https://es.idoctus.com/consulta/medicamentos',0]
+  ];
+
+  var STAR='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.600 5.400 5.900.8-4.300 4.100 1 5.800L12 16.800 6.800 19.600l1-5.800L3.500 9.700l5.900-.8z"/></svg>';
+  var CHEV='<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+
+  function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function norm(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();}
+  function kind(u){
+    try{
+      var x=new URL(u),p=x.pathname.toLowerCase(),h=x.hostname.replace(/^www\./,'');
+      if(p.slice(-4)==='.pdf')return 'PDF';
+      if(p.slice(-5)==='.xlsx')return 'Excel';
+      if(p.slice(-4)==='.png')return 'Imagen';
+      if(h.indexOf('drive.google')>-1||h.indexOf('docs.google')>-1)return 'Drive';
+      if(h.indexOf('youtube')>-1)return 'Vídeo';
+      return h;
+    }catch(e){return 'Web';}
+  }
+
+  var ALL=[],BY={};
+  S.forEach(function(s){s.groups.forEach(function(g){
+    g.list=g.items.map(function(a){
+      var it={id:s.id+'|'+g.n+'|'+a[0],t:a[0],u:a[1],d:a[2]||'',s:s,g:g,k:kind(a[1])};
+      ALL.push(it);BY[it.id]=it;return it;
+    });
+  });});
+
+  var favs=new Set();
+  try{var raw=localStorage.getItem('medapp-favs');if(raw){JSON.parse(raw).forEach(function(i){if(BY[i])favs.add(i);});}}catch(e){}
+  function saveFavs(){try{localStorage.setItem('medapp-favs',JSON.stringify(Array.from(favs)));}catch(e){}}
+
+  var app=document.getElementById('app');
+  var qEl=document.getElementById('q');
+  var tabs=Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  var view='inicio';
+
+  function rowHTML(it,showPath){
+    var fav=favs.has(it.id);
+    var meta=esc(it.k)+(showPath?' · '+esc(it.s.label)+' › '+esc(it.g.n):'');
+    return '<li class="row"><a class="link" href="'+esc(it.u)+'" target="_blank" rel="noopener noreferrer"><span class="t">'+esc(it.t)+'</span>'+
+      (it.d?'<span class="d">'+esc(it.d)+'</span>':'')+'<span class="meta">'+meta+'</span></a>'+
+      '<button type="button" class="star" data-id="'+esc(it.id)+'" aria-pressed="'+fav+'" aria-label="Favorito: '+esc(it.t)+'">'+STAR+'</button></li>';
+  }
+  function groupHTML(g){
+    return '<details class="grp'+(g.alert?' alert':'')+'" open><summary><h2>'+esc(g.n)+'</h2><span class="count">'+g.list.length+'</span>'+CHEV+'</summary><ul>'+
+      g.list.map(function(it){return rowHTML(it,false);}).join('')+'</ul></details>';
+  }
+  function favsHTML(){
+    var list=ALL.filter(function(it){return favs.has(it.id);});
+    if(!list.length)return '<p class="hint">Toca la estrella de cualquier enlace para tenerlo aquí.</p>';
+    return '<div class="grp plain"><ul style="border-top:0">'+list.map(function(it){return rowHTML(it,true);}).join('')+'</ul></div>';
+  }
+  function renderFavs(){var box=document.getElementById('favs');if(box)box.innerHTML=favsHTML();}
+
+  function renderView(id){
+    var s=S.filter(function(x){return x.id===id;})[0]||S[0];
+    var html='<h1 class="h1">'+esc(s.title)+'</h1><p class="lead">'+esc(s.lead)+'</p>';
+    if(s.id==='inicio'){
+      html+='<div class="eyebrow">Acceso rápido</div><div class="quick">'+QUICK.map(function(c){
+        return '<a class="chip'+(c[2]?' alert':'')+'" href="'+esc(c[1])+'" target="_blank" rel="noopener noreferrer">'+esc(c[0])+'</a>';
+      }).join('')+'</div>';
+      html+='<div class="eyebrow">Favoritos</div><div id="favs">'+favsHTML()+'</div>';
+    }
+    html+=s.groups.map(groupHTML).join('');
+    html+='<p class="foot">© APP-A3. Los enlaces abren sitios externos. Material de consulta: contrasta con la fuente original antes de decidir.</p>';
+    app.innerHTML=html;
+  }
+  function renderSearch(q){
+    var words=q.split(/\s+/);
+    var res=ALL.filter(function(it){
+      var hay=norm(it.t+' '+it.d+' '+it.g.n+' '+it.s.label+' '+it.k);
+      return words.every(function(w){return hay.indexOf(w)>-1;});
+    });
+    var html='<h1 class="h1">Resultados</h1><p class="lead">'+res.length+(res.length===1?' enlace':' enlaces')+' para «'+esc(qEl.value.trim())+'»</p>';
+    if(res.length){html+='<div class="grp plain" style="margin-top:16px"><ul style="border-top:0">'+res.map(function(it){return rowHTML(it,true);}).join('')+'</ul></div>';}
+    else{html+='<p class="hint" style="margin-top:16px">No hay coincidencias. Prueba con otra palabra, por ejemplo una sigla (RCP, HTA) o el nombre de la escala.</p>';}
+    app.innerHTML=html;
+  }
+  function render(){
+    var q=norm(qEl.value.trim());
+    tabs.forEach(function(t){
+      if(!q&&t.getAttribute('data-view')===view)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');
+    });
+    if(q)renderSearch(q);else renderView(view);
+  }
+  function go(id,fromHash){
+    if(!S.some(function(x){return x.id===id;}))return;
+    view=id;qEl.value='';render();window.scrollTo(0,0);
+    if(!fromHash){try{if(location.hash.slice(1)!==id)location.hash=id;}catch(e){}}
+  }
+
+  tabs.forEach(function(t){t.addEventListener('click',function(){go(t.getAttribute('data-view'),false);});});
+  qEl.addEventListener('input',render);
+  qEl.addEventListener('keydown',function(e){if(e.key==='Escape'){qEl.value='';render();}});
+  app.addEventListener('click',function(e){
+    var b=e.target.closest?e.target.closest('.star'):null;
+    if(!b)return;
+    var id=b.getAttribute('data-id');
+    if(favs.has(id))favs.delete(id);else favs.add(id);
+    saveFavs();
+    var on=favs.has(id);
+    Array.prototype.forEach.call(app.querySelectorAll('.star'),function(x){
+      if(x.getAttribute('data-id')===id)x.setAttribute('aria-pressed',String(on));
+    });
+    renderFavs();
+  });
+  window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(h&&h!==view)go(h,true);});
+
+  var h0='';try{h0=location.hash.slice(1);}catch(e){}
+  if(S.some(function(x){return x.id===h0;}))view=h0;
+  render();
+})();
+</script>
+</body>
+</html>
